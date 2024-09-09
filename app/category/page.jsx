@@ -33,7 +33,7 @@ function Category() {
     // 3. 解析markdown语法
     const parse = (data) => setHtmlString(md.render(data));
     // 处理数据
-    const handleData = () => {
+    const handleData = (data) => {
         const info = new Set();
         const questionMap = {
             10: {
@@ -114,7 +114,8 @@ function Category() {
                 list: []
             },
         }
-        feList.map((item) => {
+        // 
+        data.map((item) => {
             info.add(item.tagId);
             if (questionMap[item.tagId]) {
                 questionMap[item.tagId].list.push(item)
@@ -125,7 +126,26 @@ function Category() {
         setQuestionList(() => questionMap)
     }
     useEffect(() => {
-        handleData()
+        // 本地数据
+        handleData(feList)
+        return
+        // 服务器数据
+        fetch('http://localhost:8686/getAll')
+            .then((res) => res.json())
+            .then((res) => {
+            if (res) {
+                console.log("获取全部数据几点几分",res)
+                if(res.status == 200){
+                    handleData(res.data)
+
+                }
+                // setQuestionList(res.sort((a, b) => a.id - b.id));
+            }
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+
     }, []);
     useEffect(() => {
         setCurrentQuestionList(() => questionList[_tagId])
